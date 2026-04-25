@@ -90,3 +90,18 @@
     box-shadow: var(--shadow-card);
   }
 }
+
+.input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: black !important;
+  caret-color: black;
+  outline: none;
+}
+
+.input::placeholder {
+  color: #9ca3af;
+}

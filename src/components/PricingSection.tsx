@@ -8,7 +8,7 @@ interface PlanProps {
   deals: string;
   features: string[];
   popular?: boolean;
-  onBuy: () => void;
+  onBuy: (plan: string) => void;
 }
 
 const PlanCard = ({ name, price, deals, features, popular, onBuy }: PlanProps) => (
@@ -40,7 +40,10 @@ const PlanCard = ({ name, price, deals, features, popular, onBuy }: PlanProps) =
         </li>
       ))}
     </ul>
-    <Button variant={popular ? "gold" : "goldOutline"} size="lg" className="w-full" onClick={onBuy}>
+    <Button variant={popular ? "gold" : "goldOutline"} size="lg" className="w-full" onClick={() => {
+  console.log("BUY CLICKED", name);
+  onBuy(name);
+}}>
       Buy Now <ArrowRight size={16} />
     </Button>
   </motion.div>
@@ -74,7 +77,7 @@ const PricingSection = ({ onBuy }: PricingSectionProps) => {
               "Dedicated support",
               "100% money-back guarantee",
             ]}
-            onBuy={() => onBuy("Starter – ₹2,000/year")}
+            onBuy={onBuy}
           />
           <PlanCard
             name="Growth"
@@ -88,7 +91,7 @@ const PricingSection = ({ onBuy }: PricingSectionProps) => {
               "Dedicated account manager",
               "100% money-back guarantee",
             ]}
-            onBuy={() => onBuy("Growth – ₹3,000/year")}
+            onBuy={onBuy}
           />
         </div>
       </div>
