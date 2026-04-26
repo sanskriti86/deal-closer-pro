@@ -139,9 +139,14 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
           {/* GOOGLE BUTTON */}
           <button
             onClick={handleGoogleLogin}
-            className="w-full border border-gray-300 py-2.5 rounded-md mb-4 hover:bg-gray-50 transition"
+            className="w-full flex items-center justify-center gap-3 border border-gray-300 py-2.5 rounded-md mb-4 bg-white hover:bg-gray-50 transition font-medium"
           >
-            Continue with Google
+            <img
+              src="https://www.svgrepo.com/show/475656/google-color.svg"
+              alt="google"
+              className="w-5 h-5"
+            />
+            <span className="text-gray-700">Continue with Google</span>
           </button>
 
           {/* DIVIDER */}
@@ -203,8 +208,8 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
               {loading
                 ? "Please wait..."
                 : mode === "login"
-                ? "Sign In"
-                : "Create your account"}
+                  ? "Sign In"
+                  : "Create your account"}
             </button>
           </form>
 
