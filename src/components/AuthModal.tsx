@@ -62,6 +62,18 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
           if (loginError) throw loginError;
         }
 
+        // ✅ SAVE PROFILE
+        const user = data.user;
+
+        if (user) {
+          await supabase.from("profiles").upsert({
+            id: user.id,
+            email: user.email,
+            full_name: name,
+            phone: phone,
+          });
+        }
+
         toast({
           title: "Account created!",
         });
@@ -74,6 +86,18 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
         });
 
         if (error) throw error;
+
+        // ✅ ENSURE PROFILE EXISTS (for login / Google users)
+        const { data: userData } = await supabase.auth.getUser();
+        const user = userData.user;
+
+        if (user) {
+          await supabase.from("profiles").upsert({
+            id: user.id,
+            email: user.email,
+            full_name: user.user_metadata?.full_name || "",
+          });
+        }
 
         toast({
           title: "Welcome back!",
@@ -131,7 +155,6 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
 
         <div className="bg-white px-8 py-10">
 
-          {/* AMAZON STYLE LOGO TEXT */}
           <h1 className="text-2xl font-bold mb-6 text-center">
             {mode === "login" ? "Sign in" : "Create account"}
           </h1>
@@ -199,7 +222,6 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
               className="input"
             />
 
-            {/* PRIMARY BUTTON (AMAZON STYLE) */}
             <button
               type="submit"
               disabled={loading}
@@ -208,8 +230,8 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
               {loading
                 ? "Please wait..."
                 : mode === "login"
-                  ? "Sign In"
-                  : "Create your account"}
+                ? "Sign In"
+                : "Create your account"}
             </button>
           </form>
 
