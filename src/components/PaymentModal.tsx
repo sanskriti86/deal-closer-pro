@@ -42,9 +42,10 @@ const PaymentModal = ({
       console.log("FUNCTION RESPONSE:", data);
       console.log("FUNCTION ERROR:", error);
 
-      if (error || !data?.payment_session_id) {
-        throw new Error("Order creation failed");
-      }
+     if (error || !data?.payment_session_id) {
+  console.log("FULL BACKEND RESPONSE:", data);
+  throw new Error(data?.error || "Order creation failed");
+}
 
       const cashfree = await load({
         mode:

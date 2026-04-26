@@ -1,83 +1,67 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { createHmac } from 'node:crypto';
+/// <reference lib="deno.ns" />
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const CASHFREE_SECRET_KEY = Deno.env.get('CASHFREE_SECRET_KEY') || '';
-const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
-
-function verifyWebhookSignature(body: string, signature: string): boolean {
-  if (!CASHFREE_SECRET_KEY || !signature) return false;
-  const expectedSig = createHmac('sha256', CASHFREE_SECRET_KEY).update(body).digest('base64');
-  return expectedSig === signature;
-}
-
-Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
-
+serve(async (req) => {
   try {
-    const rawBody = await req.text();
-    const signature = req.headers.get('x-cashfree-signature') || '';
-
-    // Verify webhook signature
-    if (!verifyWebhookSignature(rawBody, signature)) {
-      console.error('Invalid webhook signature');
-      return new Response(
-        JSON.stringify({ error: 'Invalid signature' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // 🔓 Allow only POST
+    if (req.method !== "POST") {
+      return new Response("Method not allowed", { status: 405 });
     }
 
-    const payload = JSON.parse(rawBody);
-    const { data } = payload;
-    const orderId = data?.order?.order_id;
-    const paymentId = data?.payment?.cf_payment_id?.toString();
-    const paymentStatus = data?.payment?.payment_status;
+    // 📦 Get raw + parsed body
+    const rawBody = await req.text();
+    console.log("RAW BODY:", rawBody);
+
+    const body = JSON.parse(rawBody);
+    console.log("PARSED BODY:", body);
+
+    // 🎯 Extract important data
+    const orderId = body?.data?.order?.order_id;
+    const paymentStatus = body?.data?.payment?.payment_status;
+
+    console.log("ORDER:", orderId);
+    console.log("STATUS:", paymentStatus);
 
     if (!orderId) {
-      return new Response(
-        JSON.stringify({ error: 'Missing order_id' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response("Missing order id", { status: 400 });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Update payment status
-    const status = paymentStatus === 'SUCCESS' ? 'PAID' : paymentStatus || 'FAILED';
-    await supabase
-      .from('payments')
-      .update({ payment_id: paymentId, status, updated_at: new Date().toISOString() })
-      .eq('order_id', orderId);
-
-    // If payment successful, store lead
-    if (status === 'PAID') {
-      const { data: paymentData } = await supabase
-        .from('payments')
-        .select('lead_email, selected_plan')
-        .eq('order_id', orderId)
-        .single();
-
-      if (paymentData?.lead_email) {
-        console.log(`Payment successful for ${paymentData.lead_email} - Plan: ${paymentData.selected_plan}`);
-      }
-    }
-
-    return new Response(
-      JSON.stringify({ status: 'ok' }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    // 🧠 Connect Supabase
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")! // 🔴 IMPORTANT
     );
+
+    // 🔍 Check if already exists (avoid duplicates)
+    const { data: existing } = await supabase
+      .from("purchases")
+      .select("*")
+      .eq("order_id", orderId)
+      .maybeSingle();
+
+    if (existing) {
+      console.log("⚠️ Already processed:", orderId);
+      return new Response("Already processed", { status: 200 });
+    }
+
+    // ✅ Only save successful payments
+    if (paymentStatus === "SUCCESS") {
+      console.log("✅ PAYMENT SUCCESS");
+
+      await supabase.from("purchases").insert({
+        order_id: orderId,
+        status: "paid",
+      });
+    } else {
+      console.log("❌ PAYMENT FAILED");
+    }
+
+    return new Response("OK", { status: 200 });
+
   } catch (err) {
-    console.error('Webhook error:', err);
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    console.log("🔥 WEBHOOK ERROR:", err);
+    return new Response("ERROR", { status: 500 });
   }
 });
