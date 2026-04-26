@@ -66,7 +66,7 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
         const user = data.user;
 
         if (user) {
-          await supabase.from("profiles").upsert({
+          await supabase.from("deal-closer-database").upsert({
             id: user.id,
             email: user.email,
             full_name: name,
@@ -92,7 +92,7 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
         const user = userData.user;
 
         if (user) {
-          await supabase.from("profiles").upsert({
+          await supabase.from("deal-closer-database").upsert({
             id: user.id,
             email: user.email,
             full_name: user.user_metadata?.full_name || "",
