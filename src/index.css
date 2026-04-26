@@ -93,15 +93,14 @@
 
 .input {
   width: 100%;
-  padding: 10px 14px;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  background: white;
-  color: black !important;
-  caret-color: black;
+  padding: 10px 12px;
+  border: 1px solid #a6a6a6;
+  border-radius: 4px;
   outline: none;
+  font-size: 14px;
 }
 
-.input::placeholder {
-  color: #9ca3af;
+.input:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3);
 }
