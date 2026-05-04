@@ -89,7 +89,7 @@ const TermsAndConditions = () => (
           <h2 className="font-display text-xl font-semibold text-foreground mb-3">9. Contact</h2>
           <p>For questions about these terms:</p>
           <ul className="list-disc pl-5 space-y-2 mt-2">
-            <li><strong className="text-foreground">Email:</strong> <span className="text-primary">sankalpgour2@gmail.com</span></li>
+            <li><strong className="text-foreground">Email:</strong> <span className="text-primary"> support@ishwarisocials.co</span></li>
             <li><strong className="text-foreground">Address:</strong> Ishwari Socials, Indore, Madhya Pradesh, India</li>
           </ul>
         </section>

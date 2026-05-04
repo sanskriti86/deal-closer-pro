@@ -70,7 +70,7 @@ const RefundPolicy = () => (
 
         <section>
           <h2 className="font-display text-xl font-semibold text-foreground mb-3">How to Request a Refund</h2>
-          <p>Email us at <span className="text-primary">sankalpgour2@gmail.com</span> with your registered email address and reason for refund. We process all refund requests within 7 business days.</p>
+          <p>Email us at <span className="text-primary"> support@ishwarisocials.co</span> with your registered email address and reason for refund. We process all refund requests within 7 business days.</p>
           <p className="mt-2"><strong className="text-foreground">Address:</strong> Ishwari Socials, Indore, Madhya Pradesh, India</p>
         </section>
       </div>
